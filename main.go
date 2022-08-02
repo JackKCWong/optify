@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -30,8 +31,17 @@ func main() {
 		log.Fatalf("failed to read %s: %q", defaultsFile, err)
 	}
 
-	if err = yaml.Unmarshal(defaultsBytes, &defaultsMap); err != nil {
-		log.Fatalf("failed to unmarshal %s: %q", defaultsFile, err)
+	switch {
+	case strings.HasSuffix(defaultsFile, "yaml"):
+		if err = yaml.Unmarshal(defaultsBytes, &defaultsMap); err != nil {
+			log.Fatalf("failed to unmarshal %s: %q", defaultsFile, err)
+		}
+	case strings.HasSuffix(defaultsFile, "json"):
+		if err = json.Unmarshal(defaultsBytes, &defaultsMap); err != nil {
+			log.Fatalf("failed to unmarshal %s: %q", defaultsFile, err)
+		}
+	default:
+		log.Fatalf("unexpected input file %s, file name must end with yaml/json", defaultsFile)
 	}
 
 	if args, err = makeArgs(defaultsMap, args); err != nil {
