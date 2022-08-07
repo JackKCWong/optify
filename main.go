@@ -20,32 +20,35 @@ func main() {
 	var defaultsMap map[string]string
 	var defaultsBytes []byte
 
-	if len(flag.Args()) < 2 {
+	if len(flag.Args()) < 1 {
 		printUsage()
-		log.Fatal("expecting an opts file and a cmd.")
+		log.Fatal("expect at least 1 argument.")
 	}
 
 	cmd, defaultsFile, args := splitArgs(flag.Args())
 
-	if defaultsBytes, err = ioutil.ReadFile(defaultsFile); err != nil {
-		log.Fatalf("failed to read %s: %q", defaultsFile, err)
-	}
-
-	switch {
-	case strings.HasSuffix(defaultsFile, "yaml"):
-		if err = yaml.Unmarshal(defaultsBytes, &defaultsMap); err != nil {
-			log.Fatalf("failed to unmarshal %s: %q", defaultsFile, err)
+	if defaultsFile != "" {
+		if defaultsBytes, err = ioutil.ReadFile(defaultsFile); err != nil {
+			log.Fatalf("failed to read %s: %q", defaultsFile, err)
 		}
-	case strings.HasSuffix(defaultsFile, "json"):
-		if err = json.Unmarshal(defaultsBytes, &defaultsMap); err != nil {
-			log.Fatalf("failed to unmarshal %s: %q", defaultsFile, err)
-		}
-	default:
-		log.Fatalf("unexpected input file %s, file name must end with yaml/json", defaultsFile)
-	}
 
-	if args, err = makeArgs(defaultsMap, args); err != nil {
-		log.Fatal(err)
+		switch {
+		case strings.HasSuffix(defaultsFile, "yaml"):
+			if err = yaml.Unmarshal(defaultsBytes, &defaultsMap); err != nil {
+				log.Fatalf("failed to unmarshal %s: %q", defaultsFile, err)
+			}
+		case strings.HasSuffix(defaultsFile, "json"):
+			if err = json.Unmarshal(defaultsBytes, &defaultsMap); err != nil {
+				log.Fatalf("failed to unmarshal %s: %q", defaultsFile, err)
+			}
+		default:
+			log.Fatalf("unexpected input file %s, file name must end with yaml/json", defaultsFile)
+		}
+
+		if args, err = makeArgs(defaultsMap, args); err != nil {
+			log.Fatal(err)
+		}
+
 	}
 
 	var command = exec.Command(cmd, args...)
@@ -65,7 +68,12 @@ decompose the key-values in yaml/json as long opts to invoke cmd.`)
 }
 
 func splitArgs(args []string) (cmd string, defaultsFile string, opts []string) {
-	return args[0], args[1], args[2:]
+	l := len(args)
+	if l >= 3 && args[l-2] == "--" {
+		return args[0], args[l-1], args[1 : l-2]
+	}
+
+	return args[0], "", args[1:]
 }
 
 func getLongOpts(args []string) []string {

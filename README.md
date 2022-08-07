@@ -11,21 +11,22 @@ and only specify the overriding opts in command line.
 
 You can do the following with `optify`:
 
-`optify cmd defaults.yaml --opt1 o1 --opt2 o2`
+`optify cmd --opt1 o1 --opt2 o2 -- defaults.yaml`
 
-To much to type? alias it
+You can alias it:
 
 ```bash
 alias cmd="optify cmd"
-cmd defaults.yaml --opt1 o1 --opt2 o2
+cmd --opt1 o1 --opt2 o2 -- defaults.yaml
 ```
+
 
 e.g. to manage your GCE instance definition as yaml file
 
 ```bash
-optify gcloud vm_defaults.yaml compute instance create
+optify gcloud compute instance create -- vm_defaults.yaml 
 # or 
-
 alias gcloud="optify gcloud"
-gcloud vm_defaults.yaml compute instance create
+gcloud compute instance create --name foo -- defaults.yaml
+gcloud compute instance create --name foo # without '-- defaults.yaml' it just works like invoking the command directly
 ```

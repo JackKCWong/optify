@@ -9,10 +9,15 @@ import (
 func TestArgsSplit(t *testing.T) {
 	g := NewWithT(t)
 
-	cmd, defaults, args := splitArgs([]string{"test.yaml", "--", "cmd", "subcmd1", "subcmd2", "--opt1", "val1", "-f"})
+	cmd, defaults, args := splitArgs([]string{"cmd", "subcmd1", "subcmd2", "--opt1", "val1", "-f", "--", "test.yaml"})
 	g.Expect(cmd).To(Equal("cmd"))
 	g.Expect(defaults).To(Equal("test.yaml"))
 	g.Expect(args).To(Equal([]string{"subcmd1", "subcmd2", "--opt1", "val1", "-f"}))
+
+	cmd, defaults, args = splitArgs([]string{"cmd", "subcmd1", "subcmd2", "--opt1", "val1", "--"})
+	g.Expect(cmd).To(Equal("cmd"))
+	g.Expect(defaults).To(Equal(""))
+	g.Expect(args).To(Equal([]string{"subcmd1", "subcmd2", "--opt1", "val1", "--"}))
 }
 
 func TestOptsToMap(t *testing.T) {
