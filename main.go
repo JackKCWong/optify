@@ -20,7 +20,7 @@ func main() {
 	var defaultsMap map[string]string
 	var defaultsBytes []byte
 
-	if len(flag.Args()) < 3 {
+	if len(flag.Args()) < 2 {
 		printUsage()
 		log.Fatal("expecting an opts file and a cmd.")
 	}
@@ -60,34 +60,12 @@ func main() {
 
 func printUsage() {
 	fmt.Println(`usage:
-	optifiy <yaml/json> -- cmd [--opt1=o1] [--opt2 o2]
+	optifiy cmd <yaml/json> [--opt1=o1] [--opt2 o2]
 decompose the key-values in yaml/json as long opts to invoke cmd.`)
 }
 
 func splitArgs(args []string) (cmd string, defaultsFile string, opts []string) {
-	i := -1
-	for j := range args {
-		if args[j] == "--" {
-			i = j
-			break
-		}
-	}
-
-	if i == -1 {
-		printUsage()
-		panic(fmt.Errorf("no defaults provided"))
-	}
-
-	if i == len(args)-1 {
-		printUsage()
-		panic(fmt.Errorf("no cmd provided"))
-	}
-
-	if i == len(args)-2 {
-		return args[i+1], args[i-1], nil
-	}
-
-	return args[i+1], args[i-1], args[i+2:]
+	return args[0], args[1], args[2:]
 }
 
 func getLongOpts(args []string) []string {
